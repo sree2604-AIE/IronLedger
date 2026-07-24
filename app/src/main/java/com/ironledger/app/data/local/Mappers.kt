@@ -42,6 +42,8 @@ fun VehicleEntity.toDomain(): com.ironledger.app.domain.Vehicle = com.ironledger
     name = name,
     type = com.ironledger.app.domain.VehicleType.valueOf(type),
     brandModel = brandModel,
+    year = year,
+    colorHex = colorHex,
     registrationNumber = registrationNumber,
     currentMileage = currentMileage
 )

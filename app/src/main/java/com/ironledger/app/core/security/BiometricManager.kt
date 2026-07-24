@@ -28,6 +28,7 @@ class BiometricLockManager @Inject constructor(
             object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     super.onAuthenticationError(errorCode, errString)
+                    // Error = user cancelled, too many attempts, lockout etc. → close app
                     onError(errString.toString())
                 }
 
@@ -38,9 +39,11 @@ class BiometricLockManager @Inject constructor(
 
                 override fun onAuthenticationFailed() {
                     super.onAuthenticationFailed()
-                    onError("Authentication failed")
+                    // Wrong fingerprint/face — do NOT close. System will prompt to try again.
+                    // onError is NOT called here intentionally.
                 }
             })
+
 
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle("Executive Authorization")

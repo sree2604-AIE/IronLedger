@@ -59,7 +59,7 @@ fun ActivityScreen(
         
         if (state.pendingTransactions.isNotEmpty()) {
             item {
-                SectionHeader("Pending Review", "Clear All", {})
+                SectionHeader("Pending Review", "Clear All", viewModel::clearAllPending)
                 Spacer(Modifier.height(8.dp))
                 PremiumCard(accent = MaterialTheme.colorScheme.secondary) {
                     Column {

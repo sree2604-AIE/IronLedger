@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "1b9085b90ee5a01307f3cf0db8e42b7a",
+    "identityHash": "315367f515427719a5c04ea6c6ad6d4a",
     "entities": [
       {
         "tableName": "accounts",
@@ -302,7 +302,7 @@
       },
       {
         "tableName": "vehicles",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `brandModel` TEXT NOT NULL, `registrationNumber` TEXT, `currentMileage` REAL NOT NULL, `createdAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `brandModel` TEXT NOT NULL, `year` TEXT, `colorHex` TEXT, `registrationNumber` TEXT, `currentMileage` REAL NOT NULL, `createdAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -327,6 +327,16 @@
             "columnName": "brandModel",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "year",
+            "columnName": "year",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "colorHex",
+            "columnName": "colorHex",
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "registrationNumber",
@@ -658,7 +668,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1b9085b90ee5a01307f3cf0db8e42b7a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '315367f515427719a5c04ea6c6ad6d4a')"
     ]
   }
 }

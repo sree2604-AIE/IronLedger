@@ -26,7 +26,8 @@ class DataStorePreferencesRepository @Inject constructor(
             UserPreferences(
                 themeMode = prefs[Keys.themeMode]?.let(ThemeMode::valueOf) ?: ThemeMode.AMOLED,
                 accentColor = prefs[Keys.accentColor]?.let(AccentColor::valueOf) ?: AccentColor.EMERALD,
-                hideBalances = prefs[Keys.hideBalances] ?: false
+                hideBalances = prefs[Keys.hideBalances] ?: false,
+                userName = prefs[Keys.userName] ?: ""
             )
         }
 
@@ -42,9 +43,14 @@ class DataStorePreferencesRepository @Inject constructor(
         context.ironLedgerDataStore.edit { it[Keys.hideBalances] = hidden }
     }
 
+    override suspend fun setUserName(name: String) {
+        context.ironLedgerDataStore.edit { it[Keys.userName] = name }
+    }
+
     private object Keys {
         val themeMode = stringPreferencesKey("theme_mode")
         val accentColor = stringPreferencesKey("accent_color")
         val hideBalances = booleanPreferencesKey("hide_balances")
+        val userName = stringPreferencesKey("user_name")
     }
 }

@@ -65,6 +65,9 @@ interface TransactionDao {
 
     @Query("SELECT COUNT(*) FROM transactions")
     suspend fun count(): Int
+
+    @Query("DELETE FROM transactions WHERE id = :id")
+    suspend fun deleteById(id: String)
 }
 
 @Dao
@@ -74,6 +77,9 @@ interface VehicleDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(vehicle: VehicleEntity)
+
+    @Query("DELETE FROM vehicles WHERE id = :id")
+    suspend fun delete(id: String)
 
     @Query("SELECT * FROM transactions WHERE vehicleId = :vehicleId")
     fun observeVehicleTransactions(vehicleId: String): Flow<List<TransactionEntity>>
@@ -86,6 +92,9 @@ interface TripDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(trip: TripEntity)
+
+    @Query("DELETE FROM trips WHERE id = :id")
+    suspend fun delete(id: String)
 
     @Query("SELECT * FROM transactions WHERE tripId = :tripId")
     fun observeTripTransactions(tripId: String): Flow<List<TransactionEntity>>
@@ -128,6 +137,9 @@ interface SharedWalletDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(wallet: SharedWalletEntity)
+
+    @Query("DELETE FROM shared_wallets WHERE id = :id")
+    suspend fun delete(id: String)
 }
 
 @Dao
@@ -137,4 +149,49 @@ interface TripMemberDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(members: List<TripMemberEntity>)
+}
+
+@Dao
+interface FuelLogDao {
+    @Query("SELECT * FROM fuel_logs WHERE vehicleId = :vehicleId ORDER BY dateEpochMillis DESC")
+    fun observeFuelLogs(vehicleId: String): Flow<List<FuelLogEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(fuelLog: FuelLogEntity)
+}
+
+@Dao
+interface ServiceRecordDao {
+    @Query("SELECT * FROM service_records WHERE vehicleId = :vehicleId ORDER BY dateEpochMillis DESC")
+    fun observeServiceRecords(vehicleId: String): Flow<List<ServiceRecordEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(record: ServiceRecordEntity)
+}
+
+@Dao
+interface WalletExpenseDao {
+    @Query("SELECT * FROM wallet_expenses WHERE walletId = :walletId ORDER BY dateEpochMillis DESC")
+    fun observeExpenses(walletId: String): Flow<List<WalletExpenseEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(expense: WalletExpenseEntity)
+}
+
+@Dao
+interface WalletSettlementDao {
+    @Query("SELECT * FROM wallet_settlements WHERE walletId = :walletId ORDER BY dateEpochMillis DESC")
+    fun observeSettlements(walletId: String): Flow<List<WalletSettlementEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(settlement: WalletSettlementEntity)
+}
+
+@Dao
+interface BudgetDao {
+    @Query("SELECT * FROM budgets WHERE monthYear = :monthYear")
+    fun observeBudgets(monthYear: String): Flow<List<BudgetEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(budget: BudgetEntity)
 }

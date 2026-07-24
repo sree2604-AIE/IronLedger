@@ -51,8 +51,12 @@ import com.ironledger.app.feature.settings.SettingsScreen
 import com.ironledger.app.feature.splash.SplashScreen
 import com.ironledger.app.feature.subscription.SubscriptionScreen
 import com.ironledger.app.feature.transaction.AddTransactionScreen
+import com.ironledger.app.feature.trip.AddTripScreen
+import com.ironledger.app.feature.trip.TripDetailScreen
 import com.ironledger.app.feature.trip.TripListScreen
+import com.ironledger.app.feature.vault.AddAccountScreen
 import com.ironledger.app.feature.vault.VaultScreen
+import com.ironledger.app.feature.vehicle.AddVehicleScreen
 import com.ironledger.app.feature.vehicle.VehicleScreen
 import com.ironledger.app.feature.wallet.SharedWalletScreen
 
@@ -65,7 +69,8 @@ fun IronLedgerRoot(appViewModel: AppViewModel = hiltViewModel()) {
     ) {
         IronLedgerApp(
             hideBalances = preferences.hideBalances,
-            onToggleHidden = appViewModel::setHideBalances
+            onToggleHidden = appViewModel::setHideBalances,
+            userName = preferences.userName
         )
     }
 }
@@ -73,7 +78,8 @@ fun IronLedgerRoot(appViewModel: AppViewModel = hiltViewModel()) {
 @Composable
 private fun IronLedgerApp(
     hideBalances: Boolean,
-    onToggleHidden: (Boolean) -> Unit
+    onToggleHidden: (Boolean) -> Unit,
+    userName: String = ""
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -96,8 +102,8 @@ private fun IronLedgerApp(
                         onAddExpense = { navController.navigate(Routes.addTransaction("expense")) },
                         onAddIncome = { navController.navigate(Routes.addTransaction("income")) },
                         onVoiceEntry = { navController.navigate(Routes.placeholder("Voice Entry")) },
-                        onReminder = { navController.navigate(Routes.placeholder("Reminder")) },
-                        onTripExpense = { navController.navigate(Routes.placeholder("Trip Expense")) }
+                        onReminder = { navController.navigate(Routes.REMINDERS) },
+                        onTripExpense = { navController.navigate(Routes.TRIPS) }
                     )
                 }
             }
@@ -106,7 +112,8 @@ private fun IronLedgerApp(
                 navController = navController,
                 padding = if (showChrome) padding else PaddingValues(),
                 hideBalances = hideBalances,
-                onToggleHidden = onToggleHidden
+                onToggleHidden = onToggleHidden,
+                userName = userName
             )
         }
     }
@@ -117,7 +124,8 @@ private fun AppNavHost(
     navController: NavHostController,
     padding: PaddingValues,
     hideBalances: Boolean,
-    onToggleHidden: (Boolean) -> Unit
+    onToggleHidden: (Boolean) -> Unit,
+    userName: String = ""
 ) {
     Box(Modifier.fillMaxSize().padding(padding)) {
         NavHost(
@@ -141,11 +149,12 @@ private fun AppNavHost(
                     onAddExpense = { navController.navigate(Routes.addTransaction("expense")) },
                     onAddIncome = { navController.navigate(Routes.addTransaction("income")) },
                     onVoiceEntry = { navController.navigate(Routes.placeholder("Voice Entry")) },
-                    onScanReceipt = { navController.navigate(Routes.SCAN_RECEIPT) }
+                    onScanReceipt = { navController.navigate(Routes.SCAN_RECEIPT) },
+                    userName = userName
                 )
             }
             composable(Routes.ACTIVITY) { ActivityScreen(hideBalances = hideBalances) }
-            composable(Routes.ANALYTICS) { AnalyticsScreen(hideBalances = hideBalances) }
+            composable(Routes.ANALYTICS) { AnalyticsScreen(hideBalances = hideBalances, onBack = { navController.popBackStack() }) }
             composable(Routes.VAULT) {
                 VaultScreen(
                     hideBalances = hideBalances,
@@ -156,13 +165,46 @@ private fun AppNavHost(
             composable(Routes.VEHICLES) {
                 VehicleScreen(
                     hideBalances = hideBalances,
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    onAddVehicle = { navController.navigate(Routes.ADD_VEHICLE) }
+                )
+            }
+            composable(Routes.ADD_VEHICLE) {
+                AddVehicleScreen(
+                    onBack = { navController.popBackStack() },
+                    onSaved = { navController.popBackStack() }
                 )
             }
             composable(Routes.TRIPS) {
                 TripListScreen(
                     hideBalances = hideBalances,
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    onAddTrip = { navController.navigate(Routes.ADD_TRIP) },
+                    onTripDetail = { tripId -> navController.navigate(Routes.tripDetail(tripId)) }
+                )
+            }
+            composable(
+                route = Routes.TRIP_DETAIL,
+                arguments = listOf(navArgument("tripId") { type = NavType.StringType })
+            ) { entry ->
+                TripDetailScreen(
+                    tripId = entry.arguments?.getString("tripId") ?: "",
+                    hideBalances = hideBalances,
+                    onBack = { navController.popBackStack() },
+                    onAddExpense = { navController.navigate(Routes.addTransaction("expense")) },
+                    onSettleUp = { navController.navigate(Routes.placeholder("Settle Up")) }
+                )
+            }
+            composable(Routes.ADD_TRIP) {
+                AddTripScreen(
+                    onBack = { navController.popBackStack() },
+                    onSaved = { navController.popBackStack() }
+                )
+            }
+            composable(Routes.ADD_ACCOUNT) {
+                AddAccountScreen(
+                    onBack = { navController.popBackStack() },
+                    onSaved = { navController.popBackStack() }
                 )
             }
             composable(Routes.SUBSCRIPTIONS) {
@@ -185,6 +227,7 @@ private fun AppNavHost(
             }
             composable(Routes.SETTINGS) {
                 SettingsScreen(
+                    hideBalances = hideBalances,
                     onBack = { navController.popBackStack() }
                 )
             }
@@ -268,7 +311,7 @@ private data class BottomItem(val route: String, val label: String, val icon: Im
 
 private val bottomItems = listOf(
     BottomItem(Routes.HOME, "Home", Icons.Rounded.Home),
-    BottomItem(Routes.ACTIVITY, "Activity", Icons.Rounded.ReceiptLong),
+    BottomItem(Routes.ACTIVITY, "Transactions", Icons.Rounded.ReceiptLong),
     BottomItem(Routes.ANALYTICS, "Analytics", Icons.Rounded.Analytics),
     BottomItem(Routes.VAULT, "Vault", Icons.Rounded.AccountBalanceWallet),
     BottomItem(Routes.AI, "AI", Icons.Rounded.AutoAwesome)

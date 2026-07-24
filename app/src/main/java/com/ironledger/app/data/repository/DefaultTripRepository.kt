@@ -18,7 +18,7 @@ class DefaultTripRepository @Inject constructor(
     override suspend fun addTrip(trip: Trip) {
         tripDao.insert(
             TripEntity(
-                id = UUID.randomUUID().toString(),
+                id = trip.id.ifBlank { UUID.randomUUID().toString() },
                 name = trip.name,
                 budgetPaise = trip.budgetPaise,
                 startDateEpochMillis = trip.startDateEpochMillis,
@@ -27,5 +27,9 @@ class DefaultTripRepository @Inject constructor(
                 createdAtEpochMillis = System.currentTimeMillis()
             )
         )
+    }
+
+    override suspend fun deleteTrip(id: String) {
+        tripDao.delete(id)
     }
 }

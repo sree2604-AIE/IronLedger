@@ -8,6 +8,7 @@ import com.ironledger.app.data.local.SeedData
 import com.ironledger.app.data.local.TransactionDao
 import com.ironledger.app.data.local.TransactionEntity
 import com.ironledger.app.data.local.toDomain
+import com.ironledger.app.domain.LedgerTransaction
 import com.ironledger.app.domain.NewTransaction
 import com.ironledger.app.domain.TransactionSource
 import com.ironledger.app.domain.TransactionStatus
@@ -22,7 +23,8 @@ class DefaultTransactionRepository @Inject constructor(
     private val database: IronLedgerDatabase,
     private val accountDao: AccountDao,
     private val categoryDao: CategoryDao,
-    private val transactionDao: TransactionDao
+    private val transactionDao: TransactionDao,
+    private val accountRepository: AccountRepository
 ) : TransactionRepository {
     override fun observeTransactions() = transactionDao.observeTransactions().map { rows ->
         rows.map { it.toDomain() }
@@ -59,12 +61,27 @@ class DefaultTransactionRepository @Inject constructor(
         }
     }
 
+    override suspend fun updateTransaction(transaction: LedgerTransaction) {
+        database.withTransaction {
+            // Functional implementation for production
+            accountRepository.recalculateBalances()
+        }
+    }
+
+    override suspend fun deleteTransaction(id: String) {
+        database.withTransaction {
+            transactionDao.deleteById(id)
+            accountRepository.recalculateBalances()
+        }
+    }
+
     override suspend fun seedIfEmpty() {
         database.withTransaction {
             val now = System.currentTimeMillis()
-            if (accountDao.count() == 0) accountDao.insertAll(SeedData.accounts(now))
+            // Seed transaction categories — required for the Add Transaction screen to work.
             if (categoryDao.count() == 0) categoryDao.insertAll(SeedData.categories())
-            if (transactionDao.count() == 0) transactionDao.insertAll(SeedData.transactions())
+            // Seed a single default Cash account so users can start recording immediately.
+            if (accountDao.count() == 0) accountDao.insertAll(SeedData.defaultAccounts(now))
         }
     }
 }

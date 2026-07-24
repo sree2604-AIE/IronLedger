@@ -127,6 +127,8 @@ data class Vehicle(
     val name: String,
     val type: VehicleType,
     val brandModel: String,
+    val year: String? = null,
+    val colorHex: String? = null,
     val registrationNumber: String?,
     val currentMileage: Double,
     val totalExpensesPaise: Long = 0

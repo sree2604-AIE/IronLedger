@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 enum class ActivityFilter(val label: String) {
     ALL("All"),
@@ -29,7 +30,7 @@ data class ActivityUiState(
 
 @HiltViewModel
 class ActivityViewModel @Inject constructor(
-    transactionRepository: TransactionRepository
+    private val transactionRepository: TransactionRepository
 ) : ViewModel() {
     private val query = MutableStateFlow("")
     private val filter = MutableStateFlow(ActivityFilter.ALL)
@@ -70,5 +71,19 @@ class ActivityViewModel @Inject constructor(
 
     fun setFilter(value: ActivityFilter) {
         filter.update { value }
+    }
+
+    fun deleteTransaction(id: String) {
+        viewModelScope.launch {
+            transactionRepository.deleteTransaction(id)
+        }
+    }
+
+    fun clearAllPending() {
+        viewModelScope.launch {
+            uiState.value.pendingTransactions.forEach { t ->
+                transactionRepository.deleteTransaction(t.id)
+            }
+        }
     }
 }

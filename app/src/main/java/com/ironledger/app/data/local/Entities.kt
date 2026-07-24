@@ -76,9 +76,41 @@ data class VehicleEntity(
     val name: String,
     val type: String, // CAR, BIKE, SCOOTER
     val brandModel: String,
+    val year: String? = null,
+    val colorHex: String? = null,
     val registrationNumber: String?,
     val currentMileage: Double = 0.0,
     val createdAtEpochMillis: Long
+)
+
+@Entity(
+    tableName = "fuel_logs",
+    indices = [Index(value = ["vehicleId"])]
+)
+data class FuelLogEntity(
+    @PrimaryKey val id: String,
+    val vehicleId: String,
+    val dateEpochMillis: Long,
+    val odometerValue: Double,
+    val fuelQuantityLitres: Double,
+    val amountPaise: Long,
+    val stationName: String? = null,
+    val fullTank: Boolean = true
+)
+
+@Entity(
+    tableName = "service_records",
+    indices = [Index(value = ["vehicleId"])]
+)
+data class ServiceRecordEntity(
+    @PrimaryKey val id: String,
+    val vehicleId: String,
+    val dateEpochMillis: Long,
+    val odometerValue: Double,
+    val type: String, // SERVICE, REPAIR, TYRE, etc.
+    val description: String,
+    val amountPaise: Long,
+    val facilityName: String? = null
 )
 
 @Entity(tableName = "trips")
@@ -90,6 +122,17 @@ data class TripEntity(
     val endDateEpochMillis: Long?,
     val isActive: Boolean = true,
     val createdAtEpochMillis: Long
+)
+
+@Entity(
+    tableName = "trip_members",
+    indices = [Index(value = ["tripId"])]
+)
+data class TripMemberEntity(
+    @PrimaryKey val id: String,
+    val tripId: String,
+    val name: String,
+    val isOwner: Boolean = false
 )
 
 @Entity(tableName = "reminders")
@@ -126,23 +169,61 @@ data class EmiEntity(
     val createdAtEpochMillis: Long
 )
 
-@Entity(
-    tableName = "trip_members",
-    indices = [Index(value = ["tripId"])]
-)
-data class TripMemberEntity(
-    @PrimaryKey val id: String,
-    val tripId: String,
-    val name: String,
-    val isOwner: Boolean = false
-)
-
 @Entity(tableName = "shared_wallets")
 data class SharedWalletEntity(
     @PrimaryKey val id: String,
     val name: String,
     val totalBalancePaise: Long,
     val createdAtEpochMillis: Long
+)
+
+@Entity(
+    tableName = "shared_wallet_members",
+    indices = [Index(value = ["walletId"])]
+)
+data class SharedWalletMemberEntity(
+    @PrimaryKey val id: String,
+    val walletId: String,
+    val name: String,
+    val email: String? = null,
+    val joinedAtEpochMillis: Long
+)
+
+@Entity(
+    tableName = "wallet_expenses",
+    indices = [Index(value = ["walletId"]), Index(value = ["paidByMemberId"])]
+)
+data class WalletExpenseEntity(
+    @PrimaryKey val id: String,
+    val walletId: String,
+    val amountPaise: Long,
+    val description: String,
+    val dateEpochMillis: Long,
+    val paidByMemberId: String,
+    val categoryId: String? = null
+)
+
+@Entity(
+    tableName = "wallet_settlements",
+    indices = [Index(value = ["walletId"]), Index(value = ["fromMemberId"]), Index(value = ["toMemberId"])]
+)
+data class WalletSettlementEntity(
+    @PrimaryKey val id: String,
+    val walletId: String,
+    val fromMemberId: String,
+    val toMemberId: String,
+    val amountPaise: Long,
+    val dateEpochMillis: Long,
+    val status: String // PENDING, SETTLED
+)
+
+@Entity(tableName = "budgets")
+data class BudgetEntity(
+    @PrimaryKey val id: String,
+    val categoryId: String,
+    val amountPaise: Long,
+    val monthYear: String, // MM-YYYY
+    val warningThresholdPercent: Int = 80
 )
 
 data class TransactionWithRelations(

@@ -62,6 +62,7 @@ import com.ironledger.app.domain.AnalyticsSnapshot
 @Composable
 fun AnalyticsScreen(
     hideBalances: Boolean,
+    onBack: () -> Unit = {},
     viewModel: AnalyticsViewModel = hiltViewModel()
 ) {
     val snapshot by viewModel.snapshot.collectAsStateWithLifecycle()
@@ -73,7 +74,7 @@ fun AnalyticsScreen(
     ) {
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = {}) { Icon(Icons.Rounded.ArrowBack, null, tint = Color.White) }
+                IconButton(onClick = onBack) { Icon(Icons.Rounded.ArrowBack, null, tint = Color.White) }
                 Text("Analytics", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
             }
             Spacer(Modifier.height(14.dp))
@@ -109,10 +110,15 @@ private fun OverviewAnalytics(snapshot: AnalyticsSnapshot, hidden: Boolean) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 PieChartView(snapshot, modifier = Modifier.size(160.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f).padding(start = 20.dp)) {
-                    CategoryLegendItem("Housing", "35%", IronColors.Blue)
-                    CategoryLegendItem("Transport", "20%", IronColors.AccentGreen)
-                    CategoryLegendItem("Food", "15%", IronColors.Gold)
-                    CategoryLegendItem("Shopping", "12%", IronColors.Warning)
+                    val totalExp = snapshot.totalExpensePaise.takeIf { it > 0 } ?: 1L
+                    val legendColors = listOf(IronColors.Blue, IronColors.AccentGreen, IronColors.Gold, IronColors.Warning)
+                    snapshot.topCategories.take(4).forEachIndexed { i, cat ->
+                        val pct = (cat.amountPaise * 100 / totalExp).toInt()
+                        CategoryLegendItem(cat.categoryName, "$pct%", legendColors.getOrElse(i) { IronColors.Blue })
+                    }
+                    if (snapshot.topCategories.isEmpty()) {
+                        CategoryLegendItem("No data", "0%", IronColors.Blue)
+                    }
                 }
             }
         }

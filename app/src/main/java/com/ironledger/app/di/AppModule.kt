@@ -5,18 +5,25 @@ import androidx.room.Room
 import com.ironledger.app.data.local.AccountDao
 import com.ironledger.app.data.local.CategoryDao
 import com.ironledger.app.data.local.EmiDao
+import com.ironledger.app.data.local.BudgetDao
+import com.ironledger.app.data.local.FuelLogDao
 import com.ironledger.app.data.local.IronLedgerDatabase
 import com.ironledger.app.data.local.ReminderDao
+import com.ironledger.app.data.local.ServiceRecordDao
 import com.ironledger.app.data.local.SharedWalletDao
 import com.ironledger.app.data.local.SubscriptionDao
 import com.ironledger.app.data.local.TransactionDao
 import com.ironledger.app.data.local.TripDao
 import com.ironledger.app.data.local.TripMemberDao
 import com.ironledger.app.data.local.VehicleDao
+import com.ironledger.app.data.local.WalletExpenseDao
+import com.ironledger.app.data.local.WalletSettlementDao
 import com.ironledger.app.data.repository.AccountRepository
+import com.ironledger.app.data.repository.BudgetRepository
 import com.ironledger.app.data.repository.CategoryRepository
 import com.ironledger.app.data.repository.DataStorePreferencesRepository
 import com.ironledger.app.data.repository.DefaultAccountRepository
+import com.ironledger.app.data.repository.DefaultBudgetRepository
 import com.ironledger.app.data.repository.DefaultCategoryRepository
 import com.ironledger.app.data.repository.DefaultEmiRepository
 import com.ironledger.app.data.repository.DefaultReminderRepository
@@ -48,7 +55,6 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): IronLedgerDatabase =
         Room.databaseBuilder(context, IronLedgerDatabase::class.java, "ironledger.db")
-            .fallbackToDestructiveMigration(false)
             .build()
 
     @Provides fun provideAccountDao(database: IronLedgerDatabase): AccountDao = database.accountDao()
@@ -61,6 +67,11 @@ object DatabaseModule {
     @Provides fun provideEmiDao(database: IronLedgerDatabase): EmiDao = database.emiDao()
     @Provides fun provideSharedWalletDao(database: IronLedgerDatabase): SharedWalletDao = database.sharedWalletDao()
     @Provides fun provideTripMemberDao(database: IronLedgerDatabase): TripMemberDao = database.tripMemberDao()
+    @Provides fun provideFuelLogDao(database: IronLedgerDatabase): FuelLogDao = database.fuelLogDao()
+    @Provides fun provideServiceRecordDao(database: IronLedgerDatabase): ServiceRecordDao = database.serviceRecordDao()
+    @Provides fun provideWalletExpenseDao(database: IronLedgerDatabase): WalletExpenseDao = database.walletExpenseDao()
+    @Provides fun provideWalletSettlementDao(database: IronLedgerDatabase): WalletSettlementDao = database.walletSettlementDao()
+    @Provides fun provideBudgetDao(database: IronLedgerDatabase): BudgetDao = database.budgetDao()
 }
 
 @Module
@@ -76,4 +87,5 @@ abstract class RepositoryModule {
     @Binds abstract fun bindSubscriptionRepository(repository: DefaultSubscriptionRepository): SubscriptionRepository
     @Binds abstract fun bindEmiRepository(repository: DefaultEmiRepository): EmiRepository
     @Binds abstract fun bindSharedWalletRepository(repository: DefaultSharedWalletRepository): SharedWalletRepository
+    @Binds abstract fun bindBudgetRepository(repository: DefaultBudgetRepository): BudgetRepository
 }

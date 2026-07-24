@@ -8,6 +8,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -20,4 +22,19 @@ class EmiViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = emptyList()
         )
+
+    fun addEmi(loanName: String, monthlyAmountPaise: Long, totalTenureMonths: Int) {
+        viewModelScope.launch {
+            emiRepository.addEmi(
+                Emi(
+                    id = UUID.randomUUID().toString(),
+                    loanName = loanName,
+                    monthlyAmountPaise = monthlyAmountPaise,
+                    totalTenureMonths = totalTenureMonths,
+                    remainingTenureMonths = totalTenureMonths,
+                    startDateEpochMillis = System.currentTimeMillis()
+                )
+            )
+        }
+    }
 }

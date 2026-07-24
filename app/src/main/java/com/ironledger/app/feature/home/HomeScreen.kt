@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Mic
@@ -54,6 +55,7 @@ import com.ironledger.app.core.design.categoryIcon
 import com.ironledger.app.core.money.MoneyFormatter
 import com.ironledger.app.domain.InsightTone
 import com.ironledger.app.domain.TransactionType
+import java.util.Calendar
 import kotlin.math.sin
 
 @Composable
@@ -66,6 +68,7 @@ fun HomeScreen(
     onAddIncome: () -> Unit,
     onVoiceEntry: () -> Unit,
     onScanReceipt: () -> Unit,
+    userName: String = "",
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -80,8 +83,23 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text("Good Evening,", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("Arjun Sharma", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+                    val greeting = when {
+                        hour < 12 -> "Good Morning,"
+                        hour < 17 -> "Good Afternoon,"
+                        else -> "Good Evening,"
+                    }
+                    val emoji = when {
+                        hour < 12 -> "\uD83C\uDF05" // sunrise
+                        hour < 17 -> "\u2600\uFE0F" // sun
+                        else -> "\uD83C\uDF19"      // crescent moon
+                    }
+                    Text(greeting, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        text = if (userName.isNotBlank()) "$userName $emoji" else "IronLedger",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = { /* Notification */ }) {
@@ -97,7 +115,7 @@ fun HomeScreen(
                 }
             }
         }
-        item { NetWorthCard(amountPaise = state.summary.totalBalancePaise, hidden = hideBalances) }
+        item { NetWorthCard(amountPaise = state.summary.totalBalancePaise, hidden = hideBalances, changePct = state.netWorthChangePct) }
         item {
             SectionHeader("Accounts", "See All", onSeeActivity)
             Spacer(Modifier.height(12.dp))
@@ -171,14 +189,21 @@ fun HomeScreen(
                 }
             }
         }
-        item {
-            SectionHeader("Upcoming Reminders")
-            Spacer(Modifier.height(12.dp))
-            PremiumCard(contentPadding = 14.dp) {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    ReminderLine("Credit card due", "25 May", 22_000_00, hideBalances)
-                    ReminderLine("Vehicle insurance", "03 Jun", 14_500_00, hideBalances)
-                    ReminderLine("WiFi renewal", "07 Jun", 999_00, hideBalances)
+        if (state.upcomingReminders.isNotEmpty()) {
+            item {
+                SectionHeader("Upcoming Reminders")
+                Spacer(Modifier.height(12.dp))
+                PremiumCard(contentPadding = 14.dp) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        state.upcomingReminders.forEach { reminder ->
+                            ReminderLine(
+                                title = reminder.title,
+                                date = formatReminderDate(reminder.dueAtEpochMillis),
+                                amountPaise = reminder.amountPaise ?: 0L,
+                                hidden = hideBalances
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -186,7 +211,7 @@ fun HomeScreen(
 }
 
 @Composable
-private fun NetWorthCard(amountPaise: Long, hidden: Boolean) {
+private fun NetWorthCard(amountPaise: Long, hidden: Boolean, changePct: Double?) {
     PremiumCard {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("Total Net Worth", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -198,7 +223,14 @@ private fun NetWorthCard(amountPaise: Long, hidden: Boolean) {
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
-                    Text("▲ 12.6% vs last month", color = IronColors.AccentGreen, style = MaterialTheme.typography.labelSmall)
+                    if (changePct != null) {
+                        val arrow = if (changePct >= 0) "▲" else "▼"
+                        val pctStr = String.format("%.1f", Math.abs(changePct))
+                        val changeColor = if (changePct >= 0) IronColors.AccentGreen else MaterialTheme.colorScheme.error
+                        Text("$arrow $pctStr% vs last month", color = changeColor, style = MaterialTheme.typography.labelSmall)
+                    } else {
+                        Text("Track spending to see trends", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
+                    }
                 }
                 SparkLine(modifier = Modifier.size(width = 120.dp, height = 60.dp))
             }
@@ -309,5 +341,21 @@ private fun ReminderLine(title: String, date: String, amountPaise: Long, hidden:
             Text(date, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
         }
         Text(MoneyFormatter.formatINR(amountPaise, hidden = hidden), color = IronColors.Warning, style = MaterialTheme.typography.labelLarge)
+    }
+}
+
+private fun formatReminderDate(epochMillis: Long): String {
+    val diff = epochMillis - System.currentTimeMillis()
+    val days = (diff / 86_400_000L).toInt()
+    return when {
+        days <= 0 -> "Due today"
+        days == 1 -> "Tomorrow"
+        days <= 7 -> "In $days days"
+        else -> {
+            val formatter = java.time.format.DateTimeFormatter.ofPattern("d MMM")
+            java.time.Instant.ofEpochMilli(epochMillis)
+                .atZone(java.time.ZoneId.systemDefault())
+                .format(formatter)
+        }
     }
 }

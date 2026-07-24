@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -20,4 +21,19 @@ class TripViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = emptyList()
         )
+
+    fun addTrip(name: String, budget: Double) {
+        viewModelScope.launch {
+            tripRepository.addTrip(
+                Trip(
+                    id = "",
+                    name = name,
+                    budgetPaise = (budget * 100).toLong(),
+                    startDateEpochMillis = System.currentTimeMillis(),
+                    endDateEpochMillis = null,
+                    isActive = true
+                )
+            )
+        }
+    }
 }

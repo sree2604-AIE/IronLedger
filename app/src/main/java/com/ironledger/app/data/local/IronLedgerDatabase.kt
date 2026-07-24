@@ -10,14 +10,20 @@ import androidx.room.TypeConverters
         CategoryEntity::class,
         TransactionEntity::class,
         VehicleEntity::class,
+        FuelLogEntity::class,
+        ServiceRecordEntity::class,
         TripEntity::class,
+        TripMemberEntity::class,
         ReminderEntity::class,
         SubscriptionEntity::class,
         EmiEntity::class,
-        TripMemberEntity::class,
-        SharedWalletEntity::class
+        SharedWalletEntity::class,
+        SharedWalletMemberEntity::class,
+        WalletExpenseEntity::class,
+        WalletSettlementEntity::class,
+        BudgetEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -32,4 +38,9 @@ abstract class IronLedgerDatabase : RoomDatabase() {
     abstract fun emiDao(): EmiDao
     abstract fun sharedWalletDao(): SharedWalletDao
     abstract fun tripMemberDao(): TripMemberDao
+    abstract fun fuelLogDao(): FuelLogDao
+    abstract fun serviceRecordDao(): ServiceRecordDao
+    abstract fun walletExpenseDao(): WalletExpenseDao
+    abstract fun walletSettlementDao(): WalletSettlementDao
+    abstract fun budgetDao(): BudgetDao
 }
