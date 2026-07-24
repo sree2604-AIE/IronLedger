@@ -1,0 +1,335 @@
+/* ═══════════════════════════════════════════════════════════════
+   IronLedger — Login Page Styles
+   File: login.css
+═══════════════════════════════════════════════════════════════ */
+
+/* ─── CSS Reset & Base ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-deep:      #0a0d14;
+  --bg-card:      rgba(255,255,255,0.045);
+  --border:       rgba(255,255,255,0.09);
+  --border-focus: rgba(99,179,237,0.6);
+  --border-error: rgba(252,129,129,0.7);
+  --border-ok:    rgba(72,199,142,0.7);
+
+  --accent:       #63b3ed;
+  --accent-dark:  #4299e1;
+  --success:      #48c78e;
+  --error:        #fc8181;
+
+  --text-primary: #f0f4ff;
+  --text-muted:   #8896b3;
+  --text-label:   #a8b8d8;
+
+  --radius-card:  20px;
+  --radius-input: 12px;
+  --radius-btn:   12px;
+
+  --transition:   0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html, body {
+  min-height: 100%;
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Animated Background ──────────────────────────────────────── */
+body {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  overflow: hidden;
+  padding: 1.5rem;
+}
+
+body::before, body::after {
+  content: '';
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.35;
+  animation: drift 12s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+body::before {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, #3a6bd4 0%, transparent 70%);
+  top: -150px; left: -150px;
+}
+
+body::after {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, #7c3aed 0%, transparent 70%);
+  bottom: -150px; right: -150px;
+  animation-delay: -6s;
+}
+
+@keyframes drift {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(40px, 30px) scale(1.08); }
+}
+
+/* ─── Grid Overlay ─────────────────────────────────────────────── */
+.grid-overlay {
+  position: fixed; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+          mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+}
+
+/* ─── Card ─────────────────────────────────────────────────────── */
+.card {
+  position: relative;
+  z-index: 10;
+  width: 100%; max-width: 420px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 2.5rem 2.25rem 2.25rem;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.06),
+    0 20px 60px rgba(0,0,0,0.6),
+    0 4px 20px rgba(0,0,0,0.4);
+  animation: slideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(28px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+/* ─── Logo & Header ────────────────────────────────────────────── */
+.logo-wrap {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 1.75rem;
+}
+
+.logo-icon {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, #63b3ed, #7c3aed);
+  border-radius: 10px;
+  display: grid; place-items: center;
+  box-shadow: 0 0 20px rgba(99,179,237,0.35);
+}
+
+.logo-icon svg {
+  width: 20px; height: 20px;
+  fill: none; stroke: #fff;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+
+.logo-name {
+  font-size: 1.1rem; font-weight: 700;
+  background: linear-gradient(90deg, #e8f0ff, #a8c8ff);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.card-title {
+  font-size: 1.65rem; font-weight: 700;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #f0f4ff 0%, #a8c0e8 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.4rem;
+}
+
+.card-subtitle {
+  font-size: 0.875rem; color: var(--text-muted);
+  margin-bottom: 2rem;
+}
+
+/* ─── Form & Fields ────────────────────────────────────────────── */
+.form-group {
+  position: relative;
+  margin-bottom: 1.25rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.78rem; font-weight: 500;
+  color: var(--text-label);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 0.45rem;
+}
+
+.input-wrap {
+  position: relative;
+}
+
+.input-icon {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+  transition: color var(--transition);
+}
+
+.input-icon svg { width: 17px; height: 17px; display: block; }
+
+.form-input {
+  width: 100%;
+  padding: 0.8rem 2.8rem 0.8rem 2.6rem;
+  background: rgba(255,255,255,0.055);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-input);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+}
+
+.form-input::placeholder { color: rgba(136,150,179,0.55); }
+
+.form-input:focus {
+  border-color: var(--border-focus);
+  background: rgba(255,255,255,0.08);
+  box-shadow: 0 0 0 3px rgba(99,179,237,0.12);
+}
+
+.input-wrap:focus-within .input-icon { color: var(--accent); }
+
+.form-input.is-error { border-color: var(--border-error); }
+.form-input.is-valid  { border-color: var(--border-ok);   }
+
+/* ─── Password Toggle ──────────────────────────────────────────── */
+.toggle-pw {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted);
+  padding: 2px;
+  transition: color var(--transition);
+}
+.toggle-pw:hover { color: var(--accent); }
+.toggle-pw svg { width: 18px; height: 18px; display: block; }
+
+/* ─── Error / Success Field Messages ──────────────────────────── */
+.field-msg {
+  min-height: 1.2rem;
+  font-size: 0.775rem;
+  margin-top: 0.35rem;
+  padding-left: 2px;
+  display: flex; align-items: center; gap: 5px;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.field-msg.show { opacity: 1; transform: translateY(0); }
+.field-msg.err  { color: var(--error);   }
+.field-msg.ok   { color: var(--success); }
+
+.field-msg svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+/* ─── Password Strength Bar ────────────────────────────────────── */
+.strength-bar-wrap {
+  display: flex; gap: 4px; margin-top: 6px;
+}
+
+.strength-seg {
+  flex: 1; height: 3px; border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  transition: background var(--transition);
+}
+
+/* ─── Login Button ─────────────────────────────────────────────── */
+.btn-login {
+  width: 100%; margin-top: 0.5rem;
+  padding: 0.85rem;
+  border: none; border-radius: var(--radius-btn);
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem; font-weight: 600;
+  letter-spacing: 0.02em;
+  background: linear-gradient(135deg, #4299e1 0%, #7c3aed 100%);
+  color: #fff;
+  box-shadow: 0 4px 24px rgba(66,153,225,0.35);
+  transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition);
+  position: relative; overflow: hidden;
+}
+
+.btn-login::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,0);
+  transition: background var(--transition);
+}
+
+.btn-login:hover            { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(66,153,225,0.5); }
+.btn-login:hover::after     { background: rgba(255,255,255,0.06); }
+.btn-login:active           { transform: translateY(0); box-shadow: 0 2px 12px rgba(66,153,225,0.3); }
+.btn-login:disabled         { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+/* Spinner inside button */
+.btn-login .spinner {
+  display: none; width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.btn-login.loading .btn-text { display: none; }
+.btn-login.loading .spinner  { display: block; }
+
+/* ─── Success Banner ───────────────────────────────────────────── */
+.success-banner {
+  display: none;
+  align-items: center; gap: 12px;
+  background: rgba(72,199,142,0.1);
+  border: 1px solid rgba(72,199,142,0.3);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  margin-top: 1rem;
+  animation: fadeIn 0.35s ease both;
+}
+
+.success-banner.show { display: flex; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.success-icon {
+  width: 32px; height: 32px; flex-shrink: 0;
+  background: rgba(72,199,142,0.18);
+  border-radius: 50%;
+  display: grid; place-items: center;
+}
+.success-icon svg { width: 16px; height: 16px; color: var(--success); }
+
+.success-text-wrap .success-title { font-size: 0.875rem; font-weight: 600; color: var(--success); }
+.success-text-wrap .success-sub   { font-size: 0.78rem; color: rgba(72,199,142,0.7); margin-top: 2px; }
+
+/* ─── Footer ───────────────────────────────────────────────────── */
+.card-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.83rem; color: var(--text-muted);
+}
+.card-footer a { color: var(--accent); text-decoration: none; font-weight: 500; }
+.card-footer a:hover { text-decoration: underline; }
+
+/* ─── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .card { padding: 2rem 1.5rem 1.75rem; }
+  .card-title { font-size: 1.4rem; }
+}
